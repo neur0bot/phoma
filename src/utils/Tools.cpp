@@ -2,6 +2,8 @@
 #include <QFileInfo>
 #include <QImage>
 #include <array>
+#include <QPainter>
+#include <QPainterPath>
 
 QString Tools::fileSizeString(QString filepath) {
     int index = 0;
@@ -18,4 +20,29 @@ QString Tools::fileSizeString(QString filepath) {
     return QString("%1 %2").arg(QString::number(size), unit[index]);
 }
 
-// Image bit depth analysis function removed to eliminate image editing functionality
+// Return image bit depth (bits per pixel). Returns 0 for null images.
+int Tools::imageBitDepth(const QImage& image) {
+    if (image.isNull()) {
+        return 0;
+    }
+    return image.depth();
+}
+
+QPixmap Tools::scaledPixmapKeepingAspect(const QPixmap& src, const QSize& targetSize, Qt::TransformationMode mode) {
+    if (src.isNull() || targetSize.isEmpty()) return QPixmap();
+    return src.scaled(targetSize, Qt::KeepAspectRatio, mode);
+}
+
+QPixmap Tools::roundedPixmap(const QPixmap& src, int radius) {
+    if (src.isNull()) return QPixmap();
+    QPixmap out(src.size());
+    out.fill(Qt::transparent);
+    QPainter p(&out);
+    p.setRenderHint(QPainter::Antialiasing);
+    QPainterPath path;
+    path.addRoundedRect(src.rect(), radius, radius);
+    p.setClipPath(path);
+    p.drawPixmap(0, 0, src);
+    p.end();
+    return out;
+}

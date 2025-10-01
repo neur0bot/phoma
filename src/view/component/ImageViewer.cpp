@@ -116,3 +116,26 @@ void ImageViewer::adjustImageToFit() {
         fitInView(pixmapItem, Qt::KeepAspectRatio);
     }
 }
+
+void ImageViewer::scaleToPercent(int percent) {
+    if (percent < minScale) percent = minScale;
+    if (percent > maxScale) percent = maxScale;
+    // compute factor relative to 100
+    qreal factor = percent / 100.0;
+    // preserve center
+    auto viewCenter = mapToScene(viewport()->rect().center());
+    // reset transform and then scale
+    resetTransform();
+    scale(factor, factor);
+    centerOn(viewCenter);
+    cntScale = percent;
+}
+
+void ImageViewer::rotateBy(qreal degrees) {
+    // apply rotation to the pixmap item; keep current transform center
+    qreal current = pixmapItem->rotation();
+    pixmapItem->setRotation(current + degrees);
+    // adjust scene rect and view to account for rotated bounds
+    setSceneRect(pixmapItem->boundingRect());
+    fitInView(pixmapItem, Qt::KeepAspectRatio);
+}

@@ -50,6 +50,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Generate version header into the build tree so the source tree doesn't
+# have to contain a generated file. The generated header will be available
+# on the include path as <Version.h> by adding the generated include
+# directory to the target include directories below.
+if(EXISTS "${CMAKE_SOURCE_DIR}/.cmake/Version.h.in")
+    # Ensure a generated directory exists in the binary dir
+    set(GENERATED_DIR "${CMAKE_BINARY_DIR}/generated")
+    file(MAKE_DIRECTORY ${GENERATED_DIR})
+
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/.cmake/Version.h.in
+        ${GENERATED_DIR}/Version.h
+        @ONLY
+    )
+
+    # Expose this directory to targets that include <Version.h>
+    list(APPEND GENERATED_INCLUDE_DIRS ${GENERATED_DIR})
+endif()
+
 if(WIN32)
   set(VERSION_RC_PATH ${CMAKE_SOURCE_DIR}/sast-gallery-version.rc)
   set(WIN32_MANIFEST_PATH ${CMAKE_SOURCE_DIR}/app.manifest)
@@ -124,6 +143,12 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/3rdpart/ElaWidgetTools")
         src
         3rdpart/ElaWidgetTools/src/include
     )
+
+    # If we generated headers into the build tree, make sure the target
+    # can see them as well.
+    if(DEFINED GENERATED_INCLUDE_DIRS)
+        target_include_directories(sast-gallery PRIVATE ${GENERATED_INCLUDE_DIRS})
+    endif()
     
     set(ELA_WIDGET_AVAILABLE TRUE)
 else()

@@ -1,0 +1,13 @@
+#ifndef SAST_GALLERY_VERSION_H
+#define SAST_GALLERY_VERSION_H
+
+// Generated version header. This file is produced by CMake configure_file()
+// from .cmake/Version.h.in. Do not edit the generated file in src/ — edit
+// the template at .cmake/Version.h.in or the CMake variables instead.
+
+#define VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define VERSION_FULL "@PROJECT_VERSION@"
+
+#endif // SAST_GALLERY_VERSION_H

@@ -13,12 +13,18 @@ public:
     void setContent(const QPixmap& pixmap, bool fadeAnimation = true);
     void setContent(const QImage& image, bool fadeAnimation = true);
 
+    // rotate the displayed pixmap by degrees (view-only, does not modify
+    // the underlying QImage held in the delegate)
+    void rotateBy(qreal degrees);
+
     [[nodiscard]] int getScale() const;
     [[nodiscard]] int getMinScale() const;
     [[nodiscard]] int getMaxScale() const;
     void setMinScale(int scale);
     void setMaxScale(int scale);
     // Image scaling function removed
+    // Scale the view to a percentage where 100 == original size
+    void scaleToPercent(int percent);
 
 signals:
     void wheelScrolled(int delta);

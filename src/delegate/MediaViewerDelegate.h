@@ -37,7 +37,12 @@ public slots:
     void deleteImage();
     void prevImage();
     void nextImage();
-    // Image rotation function removed
+    // Image rotation / zoom functionality
+    void rotateImage();
+    void zoomIn();
+    void zoomOut();
+    void zoomToOriginal();
+    void scaleTo(int percent);
     void openInFileExplorer();
 
 private:
@@ -52,4 +57,6 @@ private:
     bool loadImage(const QImage& image, bool fadeAnimation = true);
     // Image scaling function removed
     [[nodiscard]] int getScale() const;
+    // track current applied view scale (1.0 == 100%)
+    double currentScale = 1.0;
 };

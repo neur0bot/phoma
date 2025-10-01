@@ -1,0 +1,6 @@
+# Ignore CMake build artifacts
+/build/
+
+# Generated headers
+/src/Version.h
+/build/generated/

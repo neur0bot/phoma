@@ -87,17 +87,24 @@ void MediaViewerDelegate::initConnections() {
 
     connect(view->nextAction, &QAction::triggered, this, &MediaViewerDelegate::nextImage);
 
+    // Rotation
+    connect(view->rotateAction, &QAction::triggered, this, &MediaViewerDelegate::rotateImage);
+
     connect(view->likeButton, &ElaIconButton::clicked, this, [=]() {
         //TODO(must): implement the like functionality
         // add the image to Favorite Page
     });
 
     connect(view->fileInfoButton,
-            &ElaIconButton::clicked,
-            this,
-            &MediaViewerDelegate::onFileInfoClicked);
+        &ElaIconButton::clicked,
+        this,
+        &MediaViewerDelegate::onFileInfoClicked);
 
-    // Zoom functionality removed
+    // Zoom: connect buttons and slider
+    connect(view->zoomInButton, &ElaIconButton::clicked, this, &MediaViewerDelegate::zoomIn);
+    connect(view->zoomOutButton, &ElaIconButton::clicked, this, &MediaViewerDelegate::zoomOut);
+    connect(view->zoom2originalButton, &ElaIconButton::clicked, this, &MediaViewerDelegate::zoomToOriginal);
+    connect(view->zoomSlider, &QSlider::valueChanged, this, &MediaViewerDelegate::scaleTo);
 
     // Zoom removed
 
@@ -364,6 +371,35 @@ bool MediaViewerDelegate::loadImage(const QImage& image, bool fadeAnimation) {
 }
 
 // Image scaling function removed to eliminate image editing functionality
+
+void MediaViewerDelegate::rotateImage() {
+    // rotate 90 degrees clockwise visually (view-only)
+    view->imageViewer->rotateBy(90);
+}
+
+void MediaViewerDelegate::zoomIn() {
+    int s = view->imageViewer->getScale();
+    int maxS = view->imageViewer->getMaxScale();
+    int next = qMin(maxS, s + 10);
+    scaleTo(next);
+}
+
+void MediaViewerDelegate::zoomOut() {
+    int s = view->imageViewer->getScale();
+    int minS = view->imageViewer->getMinScale();
+    int next = qMax(minS, s - 10);
+    scaleTo(next);
+}
+
+void MediaViewerDelegate::zoomToOriginal() {
+    scaleTo(100);
+}
+
+void MediaViewerDelegate::scaleTo(int percent) {
+    // percent is in [1..800], where 100 is original size
+    if (this->image.isNull()) return;
+    view->imageViewer->scaleToPercent(percent);
+}
 
 int MediaViewerDelegate::getScale() const {
     return view->imageViewer->getScale();

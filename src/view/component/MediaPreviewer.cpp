@@ -6,6 +6,7 @@
 #include <QtConcurrentRun>
 #include <model/MediaListModel.h>
 #include <view/MediaViewer.h>
+#include <utils/Tools.h>
 
 MediaPreviewer::MediaPreviewer(QAbstractItemModel* model, int rowIndex, QWidget* parent)
     : QLabel(parent) {
@@ -76,9 +77,14 @@ void MediaPreviewer::loadImageComplete() {
 }
 
 QPixmap MediaPreviewer::loadImage() {
-    // Image scaling during load removed to eliminate image editing functionality
+    // Load and scale thumbnail for preview
     QImageReader reader(filepath);
-    return QPixmap::fromImage(reader.read());
+    QImage img = reader.read();
+    if (img.isNull()) return QPixmap();
+    QPixmap px = QPixmap::fromImage(img);
+    // scale down to mediaSize but keep aspect ratio
+    QPixmap scaled = Tools::scaledPixmapKeepingAspect(px, mediaSize);
+    return Tools::roundedPixmap(scaled, 6);
 }
 
 void MediaPreviewer::enterEvent(QEnterEvent* event) {
@@ -93,12 +99,36 @@ void MediaPreviewer::leaveEvent(QEvent* event) {
 
 void MediaPreviewer::mousePressEvent(QMouseEvent* event) {
     QLabel::mousePressEvent(event);
-    // Animation removed
+    // simple press animation: scale down slightly
+    auto* anim = new QPropertyAnimation(this, "geometry");
+    anim->setDuration(120);
+    QRect start = geometry();
+    QRect end = QRect(start.x() + start.width() * 0.02,
+                      start.y() + start.height() * 0.02,
+                      start.width() * 0.96,
+                      start.height() * 0.96);
+    anim->setStartValue(start);
+    anim->setEndValue(end);
+    anim->setEasingCurve(QEasingCurve::OutCubic);
+    connect(anim, &QPropertyAnimation::finished, anim, &QObject::deleteLater);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void MediaPreviewer::mouseReleaseEvent(QMouseEvent* event) {
     QLabel::mouseReleaseEvent(event);
-    // Animation removed
+    // restore geometry
+    auto* anim = new QPropertyAnimation(this, "geometry");
+    anim->setDuration(120);
+    QRect end = geometry();
+    QRect start = QRect(end.x() - end.width() * 0.020408,
+                        end.y() - end.height() * 0.020408,
+                        static_cast<int>(end.width() / 0.96),
+                        static_cast<int>(end.height() / 0.96));
+    anim->setStartValue(start);
+    anim->setEndValue(end);
+    anim->setEasingCurve(QEasingCurve::OutCubic);
+    connect(anim, &QPropertyAnimation::finished, anim, &QObject::deleteLater);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void MediaPreviewer::mouseDoubleClickEvent(QMouseEvent* event) {
